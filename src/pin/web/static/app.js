@@ -1,12 +1,20 @@
-const map = L.map("map", { center: [0.25, 32.75], zoom: 9, worldCopyJump: true });
+const map = L.map("map", {
+  center: [0.25, 32.75],
+  zoom: 9,
+  worldCopyJump: true,
+  zoomControl: false, // re-added on the right so it clears the control panel
+});
+L.control.zoom({ position: "topright" }).addTo(map);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// Region-of-interest drawing (rectangle).
+// Region-of-interest drawing (rectangle). Kept top-right so the left-hand
+// control panel never covers the toolbar.
 const drawnItems = new L.FeatureGroup().addTo(map);
 const drawControl = new L.Control.Draw({
+  position: "topright",
   draw: {
     rectangle: { shapeOptions: { color: "#16a34a", weight: 2 } },
     polygon: false, polyline: false, circle: false, marker: false, circlemarker: false,
