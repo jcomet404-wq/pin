@@ -30,6 +30,31 @@ class StorageConfig:
 
 
 @dataclass
+class PopulationConfig:
+    """Population tracking from WorldPop gridded population counts.
+
+    WorldPop is *not* on Planetary Computer, so PIN fetches the open annual
+    country rasters from ``data.worldpop.org``. ``iso3`` is the ISO-3166 alpha-3
+    country code covering the ``bbox`` (e.g. ``"UGA"``). ``years`` defaults to
+    the calendar years spanned by the run's ``datetime`` (clamped to WorldPop's
+    2000-2020 coverage). ``resolution`` is ``"1km"`` (fast) or ``"100m"``.
+    """
+
+    iso3: str
+    years: list[int] | None = None
+    resolution: str = "1km"
+    source: str = "worldpop"
+    cache_dir: str = "./pin_cache/worldpop"
+    # Optional override: a URL template with {iso3}, {iso3_lower}, {year} fields.
+    url_template: str | None = None
+
+    def __post_init__(self) -> None:
+        self.iso3 = self.iso3.upper()
+        if self.resolution not in {"1km", "100m"}:
+            raise ValueError("population resolution must be '1km' or '100m'")
+
+
+@dataclass
 class PinConfig:
     """Everything needed to run an analysis over an area and time window.
 
@@ -46,6 +71,7 @@ class PinConfig:
     max_items_per_collection: int | None = None
     stac_url: str = "https://planetarycomputer.microsoft.com/api/stac/v1"
     storage: StorageConfig = field(default_factory=StorageConfig)
+    population: PopulationConfig | None = None
 
     def __post_init__(self) -> None:
         self.validate()
@@ -66,18 +92,21 @@ class PinConfig:
             raise ValueError("max_cloud_cover must be in [0, 100]")
         if self.resolution <= 0:
             raise ValueError("resolution must be positive")
-        if not self.collections:
-            raise ValueError("at least one collection is required")
+        if not self.collections and self.population is None:
+            raise ValueError("provide at least one collection or a population config")
 
     # ---- (de)serialisation ------------------------------------------------
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> PinConfig:
         data = dict(data)
         storage = data.pop("storage", None)
+        population = data.pop("population", None)
         cfg = cls(**data)
         if storage is not None:
             cfg.storage = StorageConfig(**storage)
-            cfg.validate()
+        if population is not None:
+            cfg.population = PopulationConfig(**population)
+        cfg.validate()
         return cfg
 
     @classmethod

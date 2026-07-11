@@ -20,6 +20,11 @@ For a given bounding box and date range it will:
 > temperature (`lst`) is derived from Landsat Collection 2 Level-2 (`ST_B10`).
 > Optical indices (`ndvi`/`ndmi`/`ndwi`) are computed from Sentinel-2 by default.
 
+It can also track **population** over time. WorldPop gridded population counts
+are *not* on Planetary Computer, so PIN downloads the open annual country
+rasters from `data.worldpop.org` (2000-2020), clips them to the bbox, and records
+total population and areal density per year alongside the spectral indices.
+
 ## Install
 
 ```bash
@@ -44,9 +49,16 @@ pin run \
   --max-cloud-cover 10 --resolution 20 --max-items 3 \
   --output ./pin_output
 
+# Track population over time (WorldPop), on its own or alongside imagery
+pin run \
+  --datetime 2015-01-01/2020-12-31 --collections "" \
+  --population-iso3 UGA --population-years 2015,2020 --population-resolution 1km \
+  --bbox 32.5,0.0,33.0,0.5 --output ./pin_output
+
 # Inspect results
 pin summary --output ./pin_output
 pin timeseries ndvi --output ./pin_output --freq MS
+pin timeseries population --output ./pin_output   # total + density per year
 pin indices        # list supported indices
 ```
 
@@ -78,12 +90,14 @@ pin_output/
 ├── sentinel-2-l2a/ndvi/<item>_ndvi.tif
 ├── sentinel-2-l2a/ndmi/<item>_ndmi.tif
 ├── landsat-c2-l2/lst/<item>_lst.tif
+├── worldpop-1km/population/<ISO3>_<year>.tif
 └── ...
 ```
 
 The `index_stats` table has one row per `(collection, item_id, index)` with
-`mean/min/max/std/valid_fraction/cloud_cover/datetime/raster_uri`, which is what
-the `timeseries` helpers read for over-time analysis.
+`mean/min/max/std/total/valid_fraction/cloud_cover/datetime/raster_uri`, which is
+what the `timeseries` helpers read for over-time analysis. For population rows,
+`total` is the absolute headcount and `mean` is people/km².
 
 ## Project layout
 
@@ -94,6 +108,7 @@ the `timeseries` helpers read for over-time analysis.
 | `pin.search` | STAC query, cloud filtering, Planetary Computer signing |
 | `pin.load` | STAC items → xarray in physical units (via `odc-stac`) |
 | `pin.indices` | NDVI / NDMI / NDWI / LST (array-library agnostic) |
+| `pin.population` | WorldPop population download, clip & per-year totals |
 | `pin.storage` | COG GeoTIFF + SQLite stats; cloud backend interface |
 | `pin.timeseries` | Retrospective time series & temporal aggregation |
 | `pin.pipeline` | Orchestration tying it all together |

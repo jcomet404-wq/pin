@@ -5,7 +5,7 @@ Microsoft Planetary Computer imagery (Sentinel-2 L2A and Landsat C2 L2) and
 persisting the results for retrospective, over-time analysis.
 """
 
-from pin.config import PinConfig
+from pin.config import PinConfig, PopulationConfig
 from pin.indices import (
     lst_celsius,
     ndmi,
@@ -18,6 +18,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "PinConfig",
+    "PopulationConfig",
     "ndvi",
     "ndmi",
     "ndwi",

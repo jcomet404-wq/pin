@@ -16,6 +16,7 @@ env/
 
 # PIN outputs
 pin_output/
+pin_cache/
 *.sqlite
 *.parquet
 *.tif

@@ -116,5 +116,11 @@ def run(config: PinConfig, *, sign: bool = True) -> list[StatRecord]:
                 continue
             storage.write_stats(records)
             all_records.extend(records)
+
+    if config.population is not None:
+        from pin.population import run_population
+
+        all_records.extend(run_population(config, storage))
+
     logger.info("Run complete: %d record(s)", len(all_records))
     return all_records

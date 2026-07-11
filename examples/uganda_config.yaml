@@ -16,3 +16,9 @@ storage:
   root: ./pin_output
   stats_db: stats.sqlite
   write_parquet: false
+
+# Population tracking over time (WorldPop; not on Planetary Computer).
+population:
+  iso3: UGA                         # country covering the bbox
+  years: [2015, 2020]               # omit to use the years spanned by `datetime`
+  resolution: 1km                   # "1km" (fast) or "100m"

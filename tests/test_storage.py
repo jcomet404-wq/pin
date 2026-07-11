@@ -37,6 +37,22 @@ def test_upsert_replaces_existing(tmp_path):
     assert df.iloc[0]["mean"] == 0.9
 
 
+def test_population_total_roundtrip(tmp_path):
+    storage = LocalStorage(StorageConfig(root=str(tmp_path)))
+    rec = StatRecord(
+        collection="worldpop-1km",
+        item_id="UGA_2020",
+        index_name="population",
+        datetime="2020-01-01T00:00:00+00:00",
+        total=4456720.0,
+        mean=1500.0,
+    )
+    storage.write_stats([rec])
+    df = storage.read_stats()
+    assert df.iloc[0]["total"] == 4456720.0
+    assert df.iloc[0]["index_name"] == "population"
+
+
 def test_empty_write_is_noop(tmp_path):
     storage = LocalStorage(StorageConfig(root=str(tmp_path)))
     storage.write_stats([])

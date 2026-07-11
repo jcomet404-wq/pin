@@ -7,7 +7,7 @@ from pathlib import Path
 
 import typer
 
-from pin.config import PinConfig, StorageConfig
+from pin.config import PinConfig, PopulationConfig, StorageConfig
 from pin.indices import available_indices
 
 app = typer.Typer(add_completion=False, help="Planetary Intelligence Network CLI.")
@@ -30,6 +30,9 @@ def _config_from_options(
     resolution: float,
     max_items: int | None,
     output: str,
+    population_iso3: str | None,
+    population_years: str | None,
+    population_resolution: str,
 ) -> PinConfig:
     if config is not None:
         cfg = PinConfig.from_file(config)
@@ -42,7 +45,7 @@ def _config_from_options(
             storage=StorageConfig(root=output),
         )
     # Inline flags override file values when supplied.
-    if collections:
+    if collections is not None:
         cfg.collections = [c.strip() for c in collections.split(",") if c.strip()]
     if indices:
         cfg.indices = [i.strip() for i in indices.split(",") if i.strip()]
@@ -52,6 +55,17 @@ def _config_from_options(
         cfg.resolution = resolution
     if max_items is not None:
         cfg.max_items_per_collection = max_items
+    if population_iso3:
+        years = (
+            [int(y) for y in population_years.split(",") if y.strip()]
+            if population_years
+            else None
+        )
+        cfg.population = PopulationConfig(
+            iso3=population_iso3,
+            years=years,
+            resolution=population_resolution,
+        )
     cfg.validate()
     return cfg
 
@@ -67,6 +81,15 @@ def run(
     resolution: float = typer.Option(10.0, help="Output pixel size in metres."),
     max_items: int | None = typer.Option(None, help="Cap items per collection."),
     output: str = typer.Option("./pin_output", help="Output directory (local backend)."),
+    population_iso3: str | None = typer.Option(
+        None, "--population-iso3", help="ISO3 country code to track WorldPop population."
+    ),
+    population_years: str | None = typer.Option(
+        None, "--population-years", help="Comma-separated years (default: from --datetime)."
+    ),
+    population_resolution: str = typer.Option(
+        "1km", "--population-resolution", help="WorldPop resolution: 1km or 100m."
+    ),
     no_sign: bool = typer.Option(False, "--no-sign", help="Do not sign Planetary Computer assets."),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ) -> None:
@@ -76,7 +99,8 @@ def run(
 
     cfg = _config_from_options(
         config, bbox, datetime, collections, indices, max_cloud_cover,
-        resolution, max_items, output,
+        resolution, max_items, output, population_iso3, population_years,
+        population_resolution,
     )
     records = run_pipeline(cfg, sign=not no_sign)
     typer.echo(f"Stored {len(records)} index record(s) under {cfg.storage.root}")

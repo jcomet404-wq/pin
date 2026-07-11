@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS {STATS_TABLE} (
     min           REAL,
     max           REAL,
     std           REAL,
+    total         REAL,
     valid_fraction REAL,
     cloud_cover   REAL,
     raster_uri    TEXT,
@@ -53,6 +54,7 @@ STATS_COLUMNS = (
     "min",
     "max",
     "std",
+    "total",
     "valid_fraction",
     "cloud_cover",
     "raster_uri",
@@ -72,6 +74,7 @@ class StatRecord:
     min: float | None = None
     max: float | None = None
     std: float | None = None
+    total: float | None = None
     valid_fraction: float | None = None
     cloud_cover: float | None = None
     raster_uri: str | None = None
@@ -108,6 +111,10 @@ class LocalStorage(Storage):
     def _init_db(self) -> None:
         with sqlite3.connect(self.db_path) as conn:
             conn.executescript(_SCHEMA)
+            existing = {row[1] for row in conn.execute(f"PRAGMA table_info({STATS_TABLE})")}
+            for col in STATS_COLUMNS:
+                if col not in existing:
+                    conn.execute(f"ALTER TABLE {STATS_TABLE} ADD COLUMN {col} REAL")
 
     def write_raster(self, data: xr.DataArray, relpath: str) -> str:
         path = self.root / relpath

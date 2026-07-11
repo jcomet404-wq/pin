@@ -29,7 +29,8 @@ def time_series(df: pd.DataFrame, index_name: str | None = None) -> pd.DataFrame
     out = _prepare(df)
     if index_name is not None:
         out = out[out["index_name"] == index_name]
-    cols = ["datetime", "collection", "index_name", "mean", "cloud_cover"]
+    cols = ["datetime", "collection", "index_name", "mean", "total", "cloud_cover"]
+    cols = [c for c in cols if c in out.columns]
     return out[cols].reset_index(drop=True)
 
 
