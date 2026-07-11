@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+import rioxarray  # noqa: F401  # registers the .rio accessor used downstream
+
 from pin.collections import CollectionSpec
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
