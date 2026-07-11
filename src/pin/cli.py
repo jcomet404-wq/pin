@@ -153,5 +153,21 @@ def list_indices() -> None:
         typer.echo(name)
 
 
+@app.command()
+def serve(
+    host: str = typer.Option("127.0.0.1", help="Host to bind."),
+    port: int = typer.Option(8000, help="Port to bind."),
+) -> None:
+    """Launch the interactive web map (requires the 'web' extra)."""
+    try:
+        from pin.web.app import serve as serve_app
+    except ImportError as exc:  # pragma: no cover
+        raise typer.BadParameter(
+            "Web dependencies missing. Install with: pip install 'pin-planetary[web]'"
+        ) from exc
+    typer.echo(f"PIN web map on http://{host}:{port}")
+    serve_app(host=host, port=port)
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()

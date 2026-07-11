@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PIN — Planetary Intelligence Network</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="panel">
+    <h1>PIN</h1>
+    <p class="sub">Draw a region, pick a layer, and visualize it.</p>
+
+    <label>Layer
+      <select id="index"></select>
+    </label>
+
+    <label>Date range (STAC)
+      <input id="datetime" type="text" value="2023-01-01/2023-06-30" />
+    </label>
+
+    <div class="row">
+      <label>Resolution (m)
+        <input id="resolution" type="number" value="60" min="10" step="10" />
+      </label>
+      <label>Max cloud %
+        <input id="cloud" type="number" value="30" min="0" max="100" />
+      </label>
+    </div>
+
+    <div id="pop-fields" class="hidden">
+      <div class="row">
+        <label>Country ISO3
+          <input id="iso3" type="text" placeholder="UGA" maxlength="3" />
+        </label>
+        <label>Year
+          <input id="year" type="number" placeholder="2020" min="2000" max="2020" />
+        </label>
+      </div>
+    </div>
+
+    <button id="compute" disabled>Draw a region first</button>
+
+    <div id="status"></div>
+
+    <div id="legend" class="hidden">
+      <div class="legend-title" id="legend-title"></div>
+      <img id="legend-img" alt="colour legend" />
+      <div class="legend-scale"><span id="legend-min"></span><span id="legend-max"></span></div>
+      <div id="stats"></div>
+    </div>
+
+    <div class="opacity-row">
+      <label>Overlay opacity
+        <input id="opacity" type="range" min="0" max="1" step="0.05" value="0.8" />
+      </label>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

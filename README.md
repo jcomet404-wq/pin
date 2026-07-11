@@ -62,6 +62,22 @@ pin timeseries population --output ./pin_output   # total + density per year
 pin indices        # list supported indices
 ```
 
+## Web map (draw a region, visualize a layer)
+
+An interactive Leaflet map lets you draw a region of interest, pick a layer
+(NDVI / NDMI / NDWI / LST / population) and a date range, and see a color-coded
+overlay with a legend.
+
+```bash
+pip install -e ".[web]"
+pin serve                 # -> http://127.0.0.1:8000
+```
+
+Draw a rectangle with the toolbar, choose a layer, then **Compute layer**. The
+backend runs the pipeline for the least-cloudy scene in the region and returns a
+colorized EPSG:4326 PNG overlaid on the map; adjust overlay opacity with the
+slider. For the population layer, enter a country ISO3 (e.g. `UGA`) and a year.
+
 ## Quickstart (Python)
 
 ```python
@@ -112,6 +128,7 @@ what the `timeseries` helpers read for over-time analysis. For population rows,
 | `pin.storage` | COG GeoTIFF + SQLite stats; cloud backend interface |
 | `pin.timeseries` | Retrospective time series & temporal aggregation |
 | `pin.pipeline` | Orchestration tying it all together |
+| `pin.web` | FastAPI + Leaflet web map (ROI drawing, colorized overlays) |
 | `pin.cli` | `pin` command-line interface |
 
 ## Development
