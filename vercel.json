@@ -1,7 +1,10 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": null,
-  "outputDirectory": "src/pin/web/static",
-  "cleanUrls": true,
-  "trailingSlash": false
+  "version": 2,
+  "builds": [
+    { "src": "src/pin/web/static/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/src/pin/web/static/index.html" },
+    { "src": "/(.*)", "dest": "/src/pin/web/static/$1" }
+  ]
 }

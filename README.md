@@ -100,16 +100,24 @@ browser is allowed to call the API; it defaults to `*`. Container hosts inject
 
 **2. Frontend (Vercel — static)**
 
-`vercel.json` deploys `src/pin/web/static/` as a static site. Point the frontend
-at your backend by editing `src/pin/web/static/config.js`:
+`vercel.json` deploys `src/pin/web/static/` as a **pure static site** — it uses a
+`@vercel/static` build so Vercel does *not* try to auto-detect and build the
+FastAPI backend from `src/pin/web/app.py` (which fails: PIN's backend can't run
+on Vercel). Point the frontend at your backend by editing
+`src/pin/web/static/config.js`:
 
 ```js
 window.PIN_CONFIG = { apiBase: "https://your-backend.fly.dev" };
 ```
 
-Then deploy the repo to Vercel (framework preset: **Other**; it picks up
-`vercel.json`). You can also override the backend ad hoc with a query param:
+Then import the repo into Vercel — with `vercel.json` present it deploys as static
+with no build step. Set **Framework Preset: Other** if the import wizard asks. You
+can also override the backend ad hoc with a query param:
 `https://your-frontend.vercel.app/?api=https://your-backend.fly.dev`.
+
+> If Vercel still tries to build a FastAPI app (error: *"No FastAPI entrypoint
+> found"*), set the project's **Root Directory** to `src/pin/web/static` in
+> Project Settings → General; that folder has no Python, so detection is skipped.
 
 If you'd rather deploy everything as one unit, the same `Dockerfile` serves both
 the API and the map at `/` — skip Vercel and just expose the container.
