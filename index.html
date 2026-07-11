@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pin — Planetary Intelligence Network</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>pin</h1>
+    <p class="tagline">Planetary Intelligence Network</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Network Nodes</h2>
+      <p class="panel-status" id="nodes-status">Loading…</p>
+      <ul class="card-list" id="nodes-list"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Live Signals</h2>
+      <p class="panel-status" id="signals-status">Loading…</p>
+      <ul class="card-list" id="signals-list"></ul>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span id="clock"></span>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
