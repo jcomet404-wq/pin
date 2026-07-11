@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": null,
+  "outputDirectory": "src/pin/web/static",
+  "cleanUrls": true,
+  "trailingSlash": false
+}

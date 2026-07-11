@@ -23,6 +23,13 @@ const drawControl = new L.Control.Draw({
 });
 map.addControl(drawControl);
 
+// Backend base URL: ?api=<url> overrides window.PIN_CONFIG.apiBase; "" = same origin.
+const API_BASE = (
+  new URLSearchParams(location.search).get("api") ||
+  (window.PIN_CONFIG && window.PIN_CONFIG.apiBase) ||
+  ""
+).replace(/\/$/, "");
+
 let bbox = null; // [minLon, minLat, maxLon, maxLat]
 let overlay = null;
 
@@ -47,7 +54,7 @@ map.on(L.Draw.Event.CREATED, (e) => {
 
 // Populate the layer dropdown from the API.
 async function loadStyles() {
-  const res = await fetch("/api/styles");
+  const res = await fetch(`${API_BASE}/api/styles`);
   const styles = await res.json();
   const sel = $("index");
   for (const [name, s] of Object.entries(styles)) {
@@ -85,7 +92,7 @@ computeBtn.addEventListener("click", async () => {
   computeBtn.disabled = true;
   setStatus("Computing… fetching imagery and coloring the layer.", "loading");
   try {
-    const res = await fetch("/api/compute", {
+    const res = await fetch(`${API_BASE}/api/compute`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -112,7 +119,7 @@ computeBtn.addEventListener("click", async () => {
 function showLegend(data) {
   $("legend").classList.remove("hidden");
   $("legend-title").textContent = data.label;
-  $("legend-img").src = `/api/legend/${data.index}`;
+  $("legend-img").src = `${API_BASE}/api/legend/${data.index}`;
   $("legend-min").textContent = data.vmin;
   $("legend-max").textContent = data.vmax;
   const s = data.stats || {};

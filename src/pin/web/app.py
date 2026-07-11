@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import base64
 import logging
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -18,6 +20,16 @@ logger = logging.getLogger(__name__)
 STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(title="PIN — Planetary Intelligence Network", version="0.1.0")
+
+# Allow a statically-hosted frontend (e.g. Vercel) to call this backend.
+# Set PIN_CORS_ORIGINS to a comma-separated list of origins; defaults to "*".
+_origins = [o.strip() for o in os.environ.get("PIN_CORS_ORIGINS", "*").split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ComputeRequest(BaseModel):
@@ -67,12 +79,10 @@ def compute(req: ComputeRequest) -> dict:
     return result
 
 
-@app.get("/")
-def index() -> FileResponse:
-    return FileResponse(STATIC_DIR / "index.html")
-
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# Serve the frontend at the root (index.html + relative assets). Mounted after
+# the API routes so /api/* still resolves. Assets use relative paths so the same
+# files also work when hosted statically (e.g. on Vercel).
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 
 def serve(host: str = "127.0.0.1", port: int = 8000) -> None:

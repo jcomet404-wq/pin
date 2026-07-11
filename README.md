@@ -78,6 +78,42 @@ backend runs the pipeline for the least-cloudy scene in the region and returns a
 colorized EPSG:4326 PNG overlaid on the map; adjust overlay opacity with the
 slider. For the population layer, enter a country ISO3 (e.g. `UGA`) and a year.
 
+## Deploy (frontend on Vercel + backend on a container host)
+
+PIN's compute backend needs heavy native libraries (GDAL/rasterio, xarray,
+odc-stac) and downloads large rasters, so it does **not** fit Vercel's
+serverless limits. Recommended split: host the static frontend on Vercel and run
+the FastAPI backend as a container elsewhere.
+
+**1. Backend (container host — Fly.io / Render / Railway / Cloud Run / VM)**
+
+A `Dockerfile` is included. It serves the API (and can serve the frontend too):
+
+```bash
+docker build -t pin-backend .
+docker run -p 8000:8000 -e PIN_CORS_ORIGINS="https://your-frontend.vercel.app" pin-backend
+```
+
+Set `PIN_CORS_ORIGINS` to your frontend origin(s) (comma-separated) so the
+browser is allowed to call the API; it defaults to `*`. Container hosts inject
+`$PORT`, which the image respects.
+
+**2. Frontend (Vercel — static)**
+
+`vercel.json` deploys `src/pin/web/static/` as a static site. Point the frontend
+at your backend by editing `src/pin/web/static/config.js`:
+
+```js
+window.PIN_CONFIG = { apiBase: "https://your-backend.fly.dev" };
+```
+
+Then deploy the repo to Vercel (framework preset: **Other**; it picks up
+`vercel.json`). You can also override the backend ad hoc with a query param:
+`https://your-frontend.vercel.app/?api=https://your-backend.fly.dev`.
+
+If you'd rather deploy everything as one unit, the same `Dockerfile` serves both
+the API and the map at `/` — skip Vercel and just expose the container.
+
 ## Quickstart (Python)
 
 ```python
